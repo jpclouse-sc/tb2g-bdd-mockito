@@ -23,13 +23,21 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.*;
+import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 @ExtendWith(MockitoExtension.class)
 class OwnerControllerTest {
 
     public static final String REDIRECT_OWNERS_5 = "redirect:/owners/5";
-    @Mock
+
+    /**
+     * We have to use lenient=true here because some of the test methods don't need
+     * the stub created in the @BeforeEach method. I suppose we could have
+     * moved the code into a regular method and have the methods that use it call
+     * the method.
+     */
+    @Mock(lenient = true)
     OwnerService service;
 
     @Mock
@@ -75,24 +83,6 @@ class OwnerControllerTest {
         );
     }
 
-    /**
-     * Using an in-line ArgumentCaptor to capture the owner list
-     */
-    /*@Test
-    void processFindFormWildCardString() {
-        // given
-        Owner owner = new Owner(1L, "Joe", "Buck");
-        List<Owner> owners = new ArrayList<>();
-        final ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-        //given(service.findAllByLastNameLike(captor.capture())).willReturn(owners);
-
-        // when
-        String viewName = controller.processFindForm(owner, bindingResult, null);
-
-        // then
-        assertThat("%Buck%").isEqualTo(captor.getValue());
-    }*/
-
     @Test
     void processFindFormWildCardStringAnnotation() {
         // given
@@ -104,6 +94,7 @@ class OwnerControllerTest {
         // then
         assertThat("%Buck%").isEqualTo(stringArgumentCaptor.getValue());
         assertThat("redirect:/owners/1").isEqualToIgnoringCase(viewName);
+        verifyZeroInteractions(model);
     }
 
     @Test
@@ -117,6 +108,7 @@ class OwnerControllerTest {
         // then
         assertThat("%DontFindMe%").isEqualTo(stringArgumentCaptor.getValue());
         assertThat("owners/findOwners").isEqualToIgnoringCase(viewName);
+        verifyZeroInteractions(model);
     }
 
     @Test
@@ -136,12 +128,12 @@ class OwnerControllerTest {
 
         // inOrder assertions
         inOrder.verify(service).findAllByLastNameLike(anyString());
-        inOrder.verify(model).addAttribute(anyString(), anyList());
+        inOrder.verify(model, times(1)).addAttribute(anyString(), anyList());
+        verifyNoMoreInteractions(model);
     }
 
     @Test
     void processCreationFormHasErrors() {
-
         // given
         Owner owner = new Owner(1L, "Joe", "Blow");
         given(bindingResult.hasErrors()).willReturn(true);
@@ -150,7 +142,7 @@ class OwnerControllerTest {
         String viewName = controller.processCreationForm(owner, bindingResult);
 
         // then
-        assertThat(viewName).isEqualTo(OwnerController.VIEWS_OWNER_CREATE_OR_UPDATE_FORM);
+        assertThat(viewName).isEqualToIgnoringCase(OwnerController.VIEWS_OWNER_CREATE_OR_UPDATE_FORM);
     }
 
     @Test
