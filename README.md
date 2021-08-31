@@ -15,3 +15,9 @@ For questions and help:
 * Or post in the Slack Community exclusive to the course.
 
 GitHub Issues will not be addressed.
+
+## Mockito BDD testing
+
+See VisitSDJpaServiceTest for a full BDD version of Mockitos tests
+Also see SpecialitySDJpaServiceTest for BDD style tests that test for exceptions
+and OwnerControllerTest
